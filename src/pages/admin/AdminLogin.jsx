@@ -59,7 +59,7 @@ const AdminLogin = () => {
     setIsLoading(true);
 
     const result = await login({
-      email: formData.identifier,
+      identifier: formData.identifier,
       password: formData.password
     });
 
