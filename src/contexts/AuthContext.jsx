@@ -73,7 +73,7 @@ export const AuthProvider = ({ children }) => {
 
       if (token && user) {
         try {
-          const response = await authAPI.verifyToken();
+          const response = await authAPI.verifyToken(token);
           if (response.data.success) {
             dispatch({
               type: AUTH_ACTIONS.LOGIN_SUCCESS,
@@ -97,17 +97,20 @@ export const AuthProvider = ({ children }) => {
     checkAuth();
   }, []);
 
-  const login = async (credentials) => {
+  const login = async ({ identifier, password }) => {
     try {
       dispatch({ type: AUTH_ACTIONS.LOGIN_START });
-      const response = await authAPI.login(credentials);
+      const response = await authAPI.login({ identifier, password }); // ✅ 'identifier' used instead of 'email'
       const { token, user } = response.data.data;
+
       localStorage.setItem('token', token);
       localStorage.setItem('user', JSON.stringify(user));
       dispatch({ type: AUTH_ACTIONS.LOGIN_SUCCESS, payload: { token, user } });
+
       return { success: true, data: response.data };
     } catch (error) {
-      const errorMessage = error.response?.data?.message || 'Login failed';
+      const errorMessage =
+        error.response?.data?.message || 'Invalid credentials';
       dispatch({ type: AUTH_ACTIONS.LOGIN_FAILURE, payload: errorMessage });
       return { success: false, error: errorMessage };
     }
@@ -118,12 +121,15 @@ export const AuthProvider = ({ children }) => {
       dispatch({ type: AUTH_ACTIONS.LOGIN_START });
       const response = await authAPI.register(userData);
       const { token, user } = response.data.data;
+
       localStorage.setItem('token', token);
       localStorage.setItem('user', JSON.stringify(user));
       dispatch({ type: AUTH_ACTIONS.LOGIN_SUCCESS, payload: { token, user } });
+
       return { success: true, data: response.data };
     } catch (error) {
-      const errorMessage = error.response?.data?.message || 'Registration failed';
+      const errorMessage =
+        error.response?.data?.message || 'Registration failed';
       dispatch({ type: AUTH_ACTIONS.LOGIN_FAILURE, payload: errorMessage });
       return { success: false, error: errorMessage };
     }
@@ -145,11 +151,13 @@ export const AuthProvider = ({ children }) => {
     try {
       const response = await authAPI.updateProfile(userData);
       const updatedUser = response.data.data.user;
+
       localStorage.setItem('user', JSON.stringify(updatedUser));
       dispatch({ type: AUTH_ACTIONS.UPDATE_USER, payload: updatedUser });
       return { success: true, data: response.data };
     } catch (error) {
-      const errorMessage = error.response?.data?.message || 'Profile update failed';
+      const errorMessage =
+        error.response?.data?.message || 'Profile update failed';
       return { success: false, error: errorMessage };
     }
   };
