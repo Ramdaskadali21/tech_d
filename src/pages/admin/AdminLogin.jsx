@@ -1,14 +1,9 @@
+// src/pages/admin/AdminLogin.tsx
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
-import { 
-  Eye, 
-  EyeOff, 
-  Lock, 
-  Mail, 
-  AlertCircle,
-  Loader2,
-  Shield
+import {
+  Eye, EyeOff, Lock, Mail, AlertCircle, Loader2, Shield
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -26,12 +21,11 @@ const AdminLogin = () => {
   });
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  
+
   const { login, isAuthenticated, error, clearError } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Redirect if already authenticated
   useEffect(() => {
     if (isAuthenticated) {
       const from = location.state?.from?.pathname || '/admin';
@@ -39,47 +33,42 @@ const AdminLogin = () => {
     }
   }, [isAuthenticated, navigate, location]);
 
-  // Clear error when component unmounts or form changes
   useEffect(() => {
     return () => clearError();
-  }, []); // Remove clearError from dependencies to prevent infinite loop
+  }, []);
 
   useEffect(() => {
     if (error) {
       const timer = setTimeout(() => clearError(), 5000);
       return () => clearTimeout(timer);
     }
-  }, [error]); // Only depend on error, not clearError
+  }, [error]);
 
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       [name]: type === 'checkbox' ? checked : value
     }));
-    
-    // Clear error when user starts typing
-    if (error) {
-      clearError();
-    }
+
+    if (error) clearError();
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
 
-    try {
-      const result = await login(formData);
-      
-      if (result.success) {
-        const from = location.state?.from?.pathname || '/admin';
-        navigate(from, { replace: true });
-      }
-    } catch (err) {
-      console.error('Login error:', err);
-    } finally {
-      setIsLoading(false);
+    const result = await login({
+      email: formData.identifier,
+      password: formData.password
+    });
+
+    if (result.success) {
+      const from = location.state?.from?.pathname || '/admin';
+      navigate(from, { replace: true });
     }
+
+    setIsLoading(false);
   };
 
   return (
@@ -117,7 +106,6 @@ const AdminLogin = () => {
               <CardTitle className="text-xl text-center">Welcome Back</CardTitle>
             </CardHeader>
             <CardContent>
-              {/* Error Alert */}
               {error && (
                 <Alert variant="destructive" className="mb-6">
                   <AlertCircle className="h-4 w-4" />
@@ -126,7 +114,6 @@ const AdminLogin = () => {
               )}
 
               <form onSubmit={handleSubmit} className="space-y-4">
-                {/* Email/Username Field */}
                 <div className="space-y-2">
                   <Label htmlFor="identifier">Email or Username</Label>
                   <div className="relative">
@@ -145,7 +132,6 @@ const AdminLogin = () => {
                   </div>
                 </div>
 
-                {/* Password Field */}
                 <div className="space-y-2">
                   <Label htmlFor="password">Password</Label>
                   <div className="relative">
@@ -178,29 +164,27 @@ const AdminLogin = () => {
                   </div>
                 </div>
 
-                {/* Remember Me */}
                 <div className="flex items-center space-x-2">
                   <Checkbox
                     id="rememberMe"
                     name="rememberMe"
                     checked={formData.rememberMe}
-                    onCheckedChange={(checked) => 
-                      setFormData(prev => ({ ...prev, rememberMe: checked }))
+                    onCheckedChange={(checked) =>
+                      setFormData((prev) => ({ ...prev, rememberMe: checked }))
                     }
                     disabled={isLoading}
                   />
-                  <Label 
-                    htmlFor="rememberMe" 
+                  <Label
+                    htmlFor="rememberMe"
                     className="text-sm font-normal cursor-pointer"
                   >
                     Remember me for 30 days
                   </Label>
                 </div>
 
-                {/* Submit Button */}
-                <Button 
-                  type="submit" 
-                  className="w-full" 
+                <Button
+                  type="submit"
+                  className="w-full"
                   disabled={isLoading}
                   size="lg"
                 >
@@ -215,7 +199,6 @@ const AdminLogin = () => {
                 </Button>
               </form>
 
-              {/* Demo Credentials */}
               <div className="mt-6 p-4 bg-muted/50 rounded-lg">
                 <h4 className="text-sm font-medium mb-2">Demo Credentials:</h4>
                 <div className="text-xs text-muted-foreground space-y-1">
@@ -226,7 +209,6 @@ const AdminLogin = () => {
             </CardContent>
           </Card>
 
-          {/* Footer */}
           <div className="text-center space-y-4">
             <p className="text-sm text-muted-foreground">
               Need help? <Link to="/contact" className="text-primary hover:underline">Contact support</Link>
@@ -242,4 +224,3 @@ const AdminLogin = () => {
 };
 
 export default AdminLogin;
-
