@@ -2,9 +2,7 @@ import axios from 'axios';
 
 // Create axios instance with base configuration
 const api = axios.create({
-  baseURL: process.env.NODE_ENV === 'production' 
-    ? 'https://your-backend-domain.com/api' 
-    : 'http://localhost:5000/api',
+  baseURL: import.meta.env.VITE_API_BASE_URL, // Use .env for flexibility
   timeout: 10000,
   headers: {
     'Content-Type': 'application/json',
@@ -20,19 +18,14 @@ api.interceptors.request.use(
     }
     return config;
   },
-  (error) => {
-    return Promise.reject(error);
-  }
+  (error) => Promise.reject(error)
 );
 
 // Response interceptor to handle errors
 api.interceptors.response.use(
-  (response) => {
-    return response;
-  },
+  (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      // Token expired or invalid
       localStorage.removeItem('token');
       localStorage.removeItem('user');
       window.location.href = '/admin/login';
@@ -53,14 +46,12 @@ export const authAPI = {
 
 // Posts API
 export const postsAPI = {
-  // Public endpoints
   getPosts: (params = {}) => api.get('/posts', { params }),
   getPost: (slug) => api.get(`/posts/${slug}`),
   getTrendingPosts: (limit = 5) => api.get('/posts/trending', { params: { limit } }),
   getTags: () => api.get('/posts/tags'),
   likePost: (id) => api.post(`/posts/${id}/like`),
-  
-  // Admin endpoints
+
   getAdminPosts: (params = {}) => api.get('/posts/admin', { params }),
   createPost: (postData) => api.post('/posts', postData),
   updatePost: (id, postData) => api.put(`/posts/${id}`, postData),
@@ -73,8 +64,7 @@ export const categoriesAPI = {
   getCategoriesWithCounts: () => api.get('/categories/with-counts'),
   getCategory: (slug) => api.get(`/categories/${slug}`),
   getCategoryPosts: (slug, params = {}) => api.get(`/categories/${slug}/posts`, { params }),
-  
-  // Admin endpoints
+
   getAdminCategories: () => api.get('/categories/admin'),
   createCategory: (categoryData) => api.post('/categories', categoryData),
   updateCategory: (id, categoryData) => api.put(`/categories/${id}`, categoryData),
@@ -121,4 +111,3 @@ export const healthAPI = {
 };
 
 export default api;
-
